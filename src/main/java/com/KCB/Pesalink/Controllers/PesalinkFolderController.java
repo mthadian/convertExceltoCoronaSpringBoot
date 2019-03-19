@@ -9,7 +9,6 @@ public class PesalinkFolderController
 		{
 			String currentWorkingDir = System.getProperty("user.dir");
 			
-	        System.out.println("Current workin directory is "+currentWorkingDir);
 	        
 	        File inputFolder = new File("input");
 	        // if the directory does not exist, create it
@@ -79,6 +78,31 @@ public class PesalinkFolderController
 	            }        
 	            if(result) {    
 	                System.out.println("errorFolder created");  
+	            }
+	        }
+	        
+			
+		}
+		
+		public static void createBackupFolder()
+		{
+		
+	        File backupFolder = new File("backup");
+	        // if the directory does not exist, create it
+	        if (!backupFolder.exists()) 
+	        {
+	            System.out.println("creating directory: " + backupFolder.getName());
+	            boolean result = false;
+
+	            try{
+	            	backupFolder.mkdir();
+	                result = true;
+	            } 
+	            catch(SecurityException se){
+	                //handle it
+	            }        
+	            if(result) {    
+	                System.out.println("backupFolder created");  
 	            }
 	        }
 	        
