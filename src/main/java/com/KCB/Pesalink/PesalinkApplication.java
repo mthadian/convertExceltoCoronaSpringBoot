@@ -9,7 +9,8 @@ import java.util.logging.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.KCB.Pesalink.Controllers.PesalinkFileController;
+import com.KCB.Pesalink.Controllers.PesalinkKBAController;
+import com.KCB.Pesalink.Controllers.PesalinkCSNFController;
 import com.KCB.Pesalink.Controllers.PesalinkFolderController;
 
 @SpringBootApplication
@@ -27,8 +28,9 @@ public class PesalinkApplication {
 		String inputFolder=currentWorkingDir.concat("\\input");
 		
 		File file = new File(inputFolder);
-		String nameString=file.getName();
-		System.out.println("INPUT FOLDER "+inputFolder);
+		
+		//System.out.println("INPUT FOLDER "+inputFolder);
+		PesalinkCSNFController.executeCSNF();
 		
 		
 		
@@ -39,7 +41,7 @@ public class PesalinkApplication {
 					
 				if(file.list().length>0)
 				{
-					PesalinkFileController.readExcel();
+					//PesalinkKBAController.executeKBA();
 					
 					
 						

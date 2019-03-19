@@ -19,10 +19,10 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-public class PesalinkFileController 
+public class PesalinkKBAController 
 {
 	
-	public static void readExcel() throws IOException
+	public static void executeKBA() throws IOException
 	{
 		String currentWorkingDir = System.getProperty("user.dir");
 		String inputFolder=currentWorkingDir.concat("\\input");		
@@ -122,8 +122,8 @@ public class PesalinkFileController
 				        String AfterHeaderSpace = new String(spaceAfterHeader);
 				        
 				    
-				        writer_vooma.println("CO0O"+HeaderSortSpace+"00000000000000000000000CORONA"+CORONACSSpace+"CS"+CS07Space+"07070"+year+month+day+year_suffix+"000000"+AfterHeaderSpace);	
-				        writer_T24.println("CO0O"+HeaderSortSpace+"00000000000000000000000CORONA"+CORONACSSpace+"CS"+CS07Space+"07070"+year+month+day+year_suffix+"000000"+AfterHeaderSpace);	
+				        writer_vooma.println("CO0O"+HeaderSortSpace+"00000000000000000000000CORONA"+CORONACSSpace+"CS"+CS07Space+"07080"+year+month+day+year_suffix+"000000"+AfterHeaderSpace);	
+				        writer_T24.println("CO0O"+HeaderSortSpace+"00000000000000000000000CORONA"+CORONACSSpace+"CS"+CS07Space+"07080"+year+month+day+year_suffix+"000000"+AfterHeaderSpace);	
 
 				      //Add Header to CORONA FILE -->
 				        
