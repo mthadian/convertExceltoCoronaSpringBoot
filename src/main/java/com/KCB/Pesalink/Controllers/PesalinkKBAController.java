@@ -29,11 +29,7 @@ public class PesalinkKBAController
 		String outputFolder=currentWorkingDir.concat("\\output");
 		String errorFolder=currentWorkingDir.concat("\\error");
 		String backUpFolder=currentWorkingDir.concat("\\backup");
-		
-		System.out.println("INPUT FOLDER "+inputFolder);
-		
-		
-		
+	
 		//InputStream ExcelFileToRead = new FileInputStream(inputFolder.concat("\\KBA SESSION TRANSACTION REPORT2.xlsx"));
 		
 		File folderInput= new File(inputFolder);
@@ -826,6 +822,7 @@ public class PesalinkKBAController
 					ExcelFile_Reader.close();
 					
 					file.renameTo(new File(errorFolder+"\\"+currentFile));
+					
 					//System.out.println(file.renameTo(new File(errorFolder+"\\"+currentFile)));
 					//readExcel();
 					

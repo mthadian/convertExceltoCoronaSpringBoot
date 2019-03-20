@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.KCB.Pesalink.Controllers.PesalinkKBAController;
+import com.KCB.Pesalink.Controllers.DeleteErrorCorona;
 import com.KCB.Pesalink.Controllers.PesalinkCSNFController;
 import com.KCB.Pesalink.Controllers.PesalinkFolderController;
 
@@ -30,7 +31,7 @@ public class PesalinkApplication {
 		File file = new File(inputFolder);
 		
 		//System.out.println("INPUT FOLDER "+inputFolder);
-		PesalinkCSNFController.executeCSNF();
+		
 		
 		
 		
@@ -41,7 +42,9 @@ public class PesalinkApplication {
 					
 				if(file.list().length>0)
 				{
-					//PesalinkKBAController.executeKBA();
+					PesalinkKBAController.executeKBA();
+					PesalinkCSNFController.executeCSNF();
+					DeleteErrorCorona.deleteCorona();
 					
 					
 						
