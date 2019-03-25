@@ -1,19 +1,24 @@
 package com.KCB.Pesalink;
 
-import java.awt.Checkbox;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.KCB.Pesalink.Controllers.PesalinkKBAController;
-import com.KCB.Pesalink.Controllers.DeleteErrorCorona;
+import com.KCB.Pesalink.Controllers.ConvertCSVtoXLSX;
+import com.KCB.Pesalink.Controllers.DeleteFiles;
 import com.KCB.Pesalink.Controllers.PesalinkCSNFController;
 import com.KCB.Pesalink.Controllers.PesalinkFolderController;
 
+
+
+/**
+ * @author PMMuthama
+ *
+ */
 @SpringBootApplication
 public class PesalinkApplication {
 
@@ -29,11 +34,7 @@ public class PesalinkApplication {
 		String inputFolder=currentWorkingDir.concat("\\input");
 		
 		File file = new File(inputFolder);
-		
-		//System.out.println("INPUT FOLDER "+inputFolder);
-		
-		
-		
+	
 		
 		while(true)
 		{
@@ -44,7 +45,9 @@ public class PesalinkApplication {
 				{
 					PesalinkKBAController.executeKBA();
 					PesalinkCSNFController.executeCSNF();
-					DeleteErrorCorona.deleteCorona();
+					DeleteFiles.deleteCorona();
+					DeleteFiles.deleteOldBackups();
+					//ConvertCSVtoXLSX.CSVtoXLSX();
 					
 					
 						

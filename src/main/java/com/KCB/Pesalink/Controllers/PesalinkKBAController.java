@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -19,16 +20,26 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+/**
+ * @author PMMuthama
+ *
+ */
+
 public class PesalinkKBAController 
 {
 	
-	public static void executeKBA() throws IOException
+	public static void executeKBA() throws IOException 
 	{
 		String currentWorkingDir = System.getProperty("user.dir");
 		String inputFolder=currentWorkingDir.concat("\\input");		
 		String outputFolder=currentWorkingDir.concat("\\output");
 		String errorFolder=currentWorkingDir.concat("\\error");
 		String backUpFolder=currentWorkingDir.concat("\\backup");
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+		Date gdate = new Date();
+		String dateNow=dateFormat.format(gdate);
+		
 	
 		//InputStream ExcelFileToRead = new FileInputStream(inputFolder.concat("\\KBA SESSION TRANSACTION REPORT2.xlsx"));
 		
@@ -42,12 +53,14 @@ public class PesalinkKBAController
 			{
 				try
 				{
+					System.out.println("<--------------KBA------------->");
 					System.out.println("CURRENT FILE PROCESSING IS "+currentFile);
+					System.out.println("<--------------KBA------------->");
 				
 					XSSFWorkbook wb = new XSSFWorkbook(ExcelFile_Reader);
 					String file_name=wb.getSheetName(0);
-					PrintWriter writer_vooma = new PrintWriter(outputFolder.concat("\\"+file_name+" VOOMA"+".CUT"), "UTF-8");
-					PrintWriter writer_T24 = new PrintWriter(outputFolder.concat("\\"+file_name+" T24"+".CUT"), "UTF-8");
+					PrintWriter writer_vooma = new PrintWriter(outputFolder.concat("\\"+file_name+" "+dateNow+" VOOMA"+".CUT"), "UTF-8");
+					PrintWriter writer_T24 = new PrintWriter(outputFolder.concat("\\"+file_name+" "+dateNow+" T24"+".CUT"), "UTF-8");
 					
 					DataFormatter formatter = new DataFormatter();
 					
@@ -813,18 +826,19 @@ public class PesalinkKBAController
 					//Close the reader
 					ExcelFile_Reader.close();
 					//move the read excel file to backup
-					file.renameTo(new File(backUpFolder+"\\"+currentFile));
+					String bk_currentFile=currentFile.substring(0, 0) + dateNow +" "+ currentFile.substring(0);
+					file.renameTo(new File(backUpFolder+"\\"+bk_currentFile));
+					
 					
 				} catch (Exception e) 
 				{
-					// TODO: handle exception
+					
 					System.out.println(e.getMessage());
+					e.printStackTrace();
 					ExcelFile_Reader.close();
 					
-					file.renameTo(new File(errorFolder+"\\"+currentFile));
-					
-					//System.out.println(file.renameTo(new File(errorFolder+"\\"+currentFile)));
-					//readExcel();
+					String error_currentFile=currentFile.substring(0, 0) + dateNow +" "+ currentFile.substring(0);
+					file.renameTo(new File(errorFolder+"\\"+error_currentFile));
 					
 				}
 				ExcelFile_Reader.close();

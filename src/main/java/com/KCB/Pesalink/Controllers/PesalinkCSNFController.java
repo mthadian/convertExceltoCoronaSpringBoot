@@ -6,13 +6,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hibernate.validator.internal.util.privilegedactions.NewInstance;
+
+/**
+ * @author PMMuthama
+ *
+ */
 
 public class PesalinkCSNFController
 {
@@ -25,22 +32,30 @@ public class PesalinkCSNFController
 		String backUpFolder=currentWorkingDir.concat("\\backup");
 		
 		//InputStream ExcelFile_Reader = new FileInputStream(inputFolder.concat("\\CSNF20190225_BANK01_1.xlsx"));
+		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+		Date gdate = new Date();
+		String dateNow=dateFormat.format(gdate);
 		
 		File folderInput= new File(inputFolder);
 		File[] files=folderInput.listFiles();
-		String currentFile="";
+		
+		//String currentFile="";
 		for(File file:files)
 		{
-			currentFile=file.getName();
+			String currentFile=file.getName();
 			InputStream ExcelFile_Reader = new FileInputStream(inputFolder.concat("\\"+currentFile));
 			if(currentFile.contains("CSNF") && currentFile.contains(".xlsx"))
 			{
 				try 
 				{
+					System.out.println("<--------------CSNF------------->");
+					System.out.println("CURRENT FILE PROCESSING IS "+currentFile);
+					System.out.println("<--------------CSNF------------->");
+					
 					XSSFWorkbook wb = new XSSFWorkbook(ExcelFile_Reader);
 					String file_name=wb.getSheetName(0);
-					PrintWriter writer_vooma = new PrintWriter(outputFolder.concat("\\"+file_name+" VOOMA"+".CUT"), "UTF-8");
-					PrintWriter writer_T24 = new PrintWriter(outputFolder.concat("\\"+file_name+" T24"+".CUT"), "UTF-8");
+					PrintWriter writer_vooma = new PrintWriter(outputFolder.concat("\\"+file_name+" "+dateNow+" VOOMA"+".CUT"), "UTF-8");
+					PrintWriter writer_T24 = new PrintWriter(outputFolder.concat("\\"+file_name+" "+dateNow+" T24"+".CUT"), "UTF-8");
 				
 					String fullDate=currentFile.substring(4, 12);
 					String date_yy=currentFile.substring(6, 8);
@@ -136,12 +151,12 @@ public class PesalinkCSNFController
 			        
 			        
 			        writer_vooma.println("CO1TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001VOOMA"+VOOMAKESSpace+"KES"
-			        +fullDate+date_y+"0010000011"
+			        +fullDate+date_y+"0000100011"
 			        +fullDate+"000000000000000000C"+AfterOpenBalSpace);
 			        
 			        
 			        writer_T24.println("CO1TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001TWO"+TWOKESSpace+"KES"
-			        +fullDate+date_y+"0010000011"
+			        +fullDate+date_y+"0000100011"
 			        +fullDate+"000000000000000000C"+AfterOpenBalSpace);
 			        
 			        //Add Opening balance -->
@@ -153,453 +168,569 @@ public class PesalinkCSNFController
 			        int lineNumber_T24=2;
 			        
 			        double cell_TranType;
-			        for(int i=1;i<lastRow;i++)
+			       // String DTorFT =formatter.formatCellValue(row.getCell(43,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+			        for(int i=1;i<=lastRow;i++)
 			        {
 			        	row=sheet.getRow(i);
-			        	cell_TranType=row.getCell(61).getNumericCellValue();
 			        	
-			        	double cell_Mti=row.getCell(36).getNumericCellValue();
-			        	double cell_AcqId=row.getCell(4).getNumericCellValue();
-			        	double cell_TranAmount=row.getCell(56).getNumericCellValue();
-			        	
-			        	
-			        	int transType = (int) cell_TranType;
-			        	int mti= (int) cell_Mti;
-			        	int acqId= (int) cell_AcqId;
-			        	//int tranAmount= (int) cell_TranAmount;
-			        	
-			        	if(transType!=50)      		
-			        		
+			        	String DTorFT =formatter.formatCellValue(row.getCell(0,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+			        	if(DTorFT.contains("DT"))
 			        	{
-			        		//START VOOMA STATEMENT LINE
-			        		if(acqId==1 || transType==26 )///vooma
-			        		{
-			        			String D_or_C="";
-			                	if((transType==26 && mti==1200) || (transType==10 && mti==1420))
-			                	{
-			                		D_or_C="C";
-			                	}
-			                
-			                	if((transType==26 && mti==1420) || (transType==10 && mti==1200))
-			                	{
-			                		D_or_C="D";
-			                	}
-			                	
-			                	
-			                	int length_lineNumber = String.valueOf(lineNumber_VOOMA).length();
-					        	int rem0lineNumber=4-length_lineNumber;
-					        	char[] arr0 = new char[rem0lineNumber];
-					        	if(length_lineNumber<12)
-					        	{
-					        		for(int x=0;x<rem0lineNumber;x++)
+			        		cell_TranType=row.getCell(61).getNumericCellValue();
+				        	
+				        	double cell_Mti=row.getCell(36).getNumericCellValue();
+				        	double cell_AcqId=row.getCell(4).getNumericCellValue();
+				        	double cell_TranAmount=row.getCell(56).getNumericCellValue();
+				        	
+				        	
+				        	int transType = (int) cell_TranType;
+				        	int mti= (int) cell_Mti;
+				        	int acqId= (int) cell_AcqId;
+				        	//int tranAmount= (int) cell_TranAmount;
+				        	
+				        	if(transType!=50)      		
+				        		
+				        	{
+				        		//START VOOMA STATEMENT LINE
+				        		if(acqId==1 && transType==10 )///vooma
+				        		{
+				        			String D_or_C="";
+				                	if((transType==26 && mti==1200) || (transType==10 && mti==1420))
+				                	{
+				                		D_or_C="C";
+				                		cell_TranAmount=-(cell_TranAmount);
+				                		
+				                	}
+				                
+				                	if((transType==26 && mti==1420) || (transType==10 && mti==1200))
+				                	{
+				                		D_or_C="D";
+				                	}
+				                	
+				                	
+				                	int length_lineNumber = String.valueOf(lineNumber_VOOMA).length();
+						        	int rem0lineNumber=4-length_lineNumber;
+						        	char[] arr0 = new char[rem0lineNumber];
+						        	if(length_lineNumber<12)
+						        	{
+						        		for(int x=0;x<rem0lineNumber;x++)
+						        		{
+						        			arr0[x]='0';
+						        		}	
+						        		
+						        	}
+						        	
+						        	String zeros_LineNumber = new String(arr0);
+						        	//cell_TranAmount=cell_TranAmount/100;
+						        	
+						        	double transamount_absoluteVal=Math.abs(cell_TranAmount);
+						        	//int amount = (int) (transamount_absoluteVal*10000);
+						        	BigDecimal amount= new BigDecimal(transamount_absoluteVal*100);
+						        	
+						        	int length_Amount = String.valueOf(amount).length();
+						        	
+						        	 int rem0Amount=18-length_Amount;
+						        	 char[] arr0Amount = new char[rem0Amount];
+							        	if(length_Amount<18)
+							        	{
+							        		for(int x=0;x<rem0Amount;x++)
+							        		{
+							        			arr0Amount[x]='0';
+							        		}	
+							        		
+							        	}
+						        	String zeros_Amount = new String(arr0Amount);	
+						        	
+						        	
+						        	double cell_TranDateTime=row.getCell(58).getNumericCellValue();		        		
+					        		BigDecimal TranDateTime= new BigDecimal(cell_TranDateTime);		        		
+					        		String str_TranDateTime = String.valueOf(TranDateTime);
+					        		String tranDate=str_TranDateTime.substring(0, 8);
+					        		
+					        		double cell_SettlDate =row.getCell(51).getNumericCellValue();		        		
+					        		BigDecimal SettlDate = new BigDecimal(cell_SettlDate);		
+					        		
+					        		String Our_ref1="";
+					        		String SenderAn =formatter.formatCellValue(row.getCell(43,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+					        		
+					        		BigDecimal bd_SenderAn;
+					        		if(SenderAn.contains("+"))
 					        		{
-					        			arr0[x]='0';
-					        		}	
+					        			double d_senderAn=row.getCell(43).getNumericCellValue();
+					        			bd_SenderAn=new BigDecimal(d_senderAn);
+					        			SenderAn=String.valueOf(bd_SenderAn);
+					        		}
 					        		
-					        	}
-					        	
-					        	String zeros_LineNumber = new String(arr0);
-					        	
-					        	double transamount_absoluteVal=Math.abs(cell_TranAmount);
-					        	//int amount = (int) (transamount_absoluteVal*10000);
-					        	BigDecimal amount= new BigDecimal(transamount_absoluteVal*10000);
-					        	
-					        	int length_Amount = String.valueOf(amount).length();
-					        	
-					        	 int rem0Amount=18-length_Amount;
-					        	 char[] arr0Amount = new char[rem0Amount];
-						        	if(length_Amount<18)
-						        	{
-						        		for(int x=0;x<rem0Amount;x++)
-						        		{
-						        			arr0Amount[x]='0';
-						        		}	
-						        		
-						        	}
-					        	String zeros_Amount = new String(arr0Amount);	
-					        	
-					        	
-					        	double cell_TranDateTime=row.getCell(58).getNumericCellValue();		        		
-				        		BigDecimal TranDateTime= new BigDecimal(cell_TranDateTime);		        		
-				        		String str_TranDateTime = String.valueOf(TranDateTime);
-				        		String tranDate=str_TranDateTime.substring(0, 8);
-				        		
-				        		double cell_SettlDate =row.getCell(51).getNumericCellValue();		        		
-				        		BigDecimal SettlDate = new BigDecimal(cell_SettlDate);		
-				        		
-				        		String Our_ref1="";
-				        		String SenderAn =formatter.formatCellValue(row.getCell(43,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-				        		
-				        		BigDecimal bd_SenderAn;
-				        		if(SenderAn.contains("+"))
-				        		{
-				        			double d_senderAn=row.getCell(43).getNumericCellValue();
-				        			bd_SenderAn=new BigDecimal(d_senderAn);
-				        			SenderAn=String.valueOf(bd_SenderAn);
-				        		}
-				        		
-				        		
-				        		String ReceiverAn =formatter.formatCellValue(row.getCell(102,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));		        		
-				        		BigDecimal bd_ReceiverAn;
-				        		if(ReceiverAn.contains("+"))
-				        		{
-				        			double d_ReceiverAn=row.getCell(102).getNumericCellValue();
-				        			bd_ReceiverAn=new BigDecimal(d_ReceiverAn);
-				        			ReceiverAn=String.valueOf(bd_ReceiverAn);
-				        		}
-				        		
-				        		if(D_or_C.contains("D"))
-				        		{
-				        			Our_ref1=SenderAn;
-				        		}
-				        		
-				        		if(D_or_C.contains("C"))
-				        		{
-				        			Our_ref1=ReceiverAn;
-				        		}
-				        		
-				        		int length_Our_ref1=Our_ref1.length();
-					        	int rem0Our_ref1=16-length_Our_ref1;
-					        	 char[] arr0Our_ref1 = new char[rem0Our_ref1];
-						        	if(length_Our_ref1<16)
-						        	{
-						        		for(int x=0;x<rem0Our_ref1;x++)
-						        		{
-						        			arr0Our_ref1[x]=' ';
-						        			//arr0senderAcc[x]='0';
-						        		}	
-						        		
-						        	}
-						        	
-					        	String space_Our_ref1 = new String(arr0Our_ref1);
-					        	
-					        	String Our_ref2=Our_ref1;
-					        	String space_Our_ref2=space_Our_ref1;
-					        	
-					        	
-					        	double D_RRN=row.getCell(41).getNumericCellValue();			        	
-				        		BigDecimal RRN= new BigDecimal(D_RRN);
-				        		
-				        		int length_RRN = String.valueOf(RRN).length();
-				        		int rem0RRN=16-length_RRN;
-					        	 char[] arr0RRN = new char[rem0RRN];
-						        	if(length_RRN<16)
-						        	{
-						        		for(int x=0;x<rem0RRN;x++)
-						        		{
-						        			arr0RRN[x]=' ';
-						        		}	
-						        		
-						        	}
-						        	
-						        	String spaces_RRN = new String(arr0RRN);
-					        	
-			        		
-						        	int space_TType_UTType_FCode_DepId=14;
-							        char[] spaceTType_UTType_FCode_DepId = new char[space_TType_UTType_FCode_DepId];
-							        for(int x=0;x<space_TType_UTType_FCode_DepId;x++)
-							    		{
-								        	spaceTType_UTType_FCode_DepId[x]=' ';
-							    		}
-							        String TType_UTType_FCode_DepIdSpace = new String(spaceTType_UTType_FCode_DepId);
-							        
-							        double D_TransactionId=row.getCell(62).getNumericCellValue();			        	
-					        		BigDecimal transactionId= new BigDecimal(D_TransactionId);	
 					        		
-					        		int length_transactionId=String.valueOf(transactionId).length();
-							        int rem0transactionId=41-length_transactionId;
-						        	 char[] arr0transactionId = new char[rem0transactionId];
-							        	if(length_transactionId<41)
+					        		String ReceiverAn =formatter.formatCellValue(row.getCell(102,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));		        		
+					        		BigDecimal bd_ReceiverAn;
+					        		if(ReceiverAn.contains("+"))
+					        		{
+					        			double d_ReceiverAn=row.getCell(102).getNumericCellValue();
+					        			bd_ReceiverAn=new BigDecimal(d_ReceiverAn);
+					        			ReceiverAn=String.valueOf(bd_ReceiverAn);
+					        		}
+					        		
+					        		if(D_or_C.contains("D"))
+					        		{
+					        			Our_ref1=SenderAn;
+					        		}
+					        		
+					        		if(D_or_C.contains("C"))
+					        		{
+					        			Our_ref1=ReceiverAn;
+					        		}
+					        		
+					        		int length_Our_ref1=Our_ref1.length();
+						        	int rem0Our_ref1=16-length_Our_ref1;
+						        	 char[] arr0Our_ref1 = new char[rem0Our_ref1];
+							        	if(length_Our_ref1<16)
 							        	{
-							        		for(int x=0;x<rem0transactionId;x++)
+							        		for(int x=0;x<rem0Our_ref1;x++)
 							        		{
-							        			arr0transactionId[x]=' ';
+							        			arr0Our_ref1[x]=' ';
+							        			//arr0senderAcc[x]='0';
 							        		}	
 							        		
 							        	}
 							        	
-							        	String space_transactionId = new String(arr0transactionId);
-							        	
-						        	String receiverInstCode=formatter.formatCellValue(row.getCell(104,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-						        	String senderInstCode=formatter.formatCellValue(row.getCell(107,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-						        	String SenderReceiverInstCode="R"+String.valueOf(receiverInstCode)+"  "+"S"+String.valueOf(senderInstCode);
-						        	int length_senderReceiver=SenderReceiverInstCode.length();
-						        	int remSpacesenderReceiver=400-length_senderReceiver;
-						        	 char[] arrSpacesenderReceiver = new char[remSpacesenderReceiver];
-							        	if(length_senderReceiver<400)
+						        	String space_Our_ref1 = new String(arr0Our_ref1);
+						        	
+						        	String Our_ref2=Our_ref1;
+						        	String space_Our_ref2=space_Our_ref1;
+						        	
+						        	
+						        	
+						        	double D_TransactionId=row.getCell(62).getNumericCellValue();			        	
+					        		BigDecimal transactionId= new BigDecimal(D_TransactionId);
+						        	
+						        	
+						        	
+						        	String THR1=String.valueOf(transactionId);
+						        	int length_THR1 = THR1.length();
+					        		int rem0THR1=16-length_THR1;
+						        	 char[] arr0THR1 = new char[rem0THR1];
+							        	if(length_THR1<16)
 							        	{
-							        		for(int x=0;x<remSpacesenderReceiver;x++)
+							        		for(int x=0;x<rem0THR1;x++)
 							        		{
-							        			arrSpacesenderReceiver[x]=' ';
+							        			arr0THR1[x]=' ';
 							        		}	
 							        		
 							        	}
 							        	
-							        	String space_senderReceiver = new String(arrSpacesenderReceiver);
+							        	String spaces_THR1 = new String(arr0THR1);
+					        		
+							        String THR2=str_TranDateTime;
+							        int length_THR2 = String.valueOf(THR2).length();
+					        		int rem0THR2=16-length_THR2;
+						        	 char[] arr0THR2 = new char[rem0THR2];
+							        	if(length_THR2<16)
+							        	{
+							        		for(int x=0;x<rem0THR2;x++)
+							        		{
+							        			arr0THR2[x]=' ';
+							        		}	
+							        		
+							        	}
 							        	
-							        	String ApprCode=formatter.formatCellValue(row.getCell(3,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-							        	String stan=formatter.formatCellValue(row.getCell(52,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+							        	String spaces_THR2 = new String(arr0THR2);
 							        	
+							        	String AQCID=String.valueOf(acqId);
+							        	if(AQCID.length()>4)
+							        	{
+							        		AQCID=AQCID.substring(AQCID.length() - 4);
+							        	}
+							        	else
+							        	{
+							        		AQCID=AQCID;
+										}
 							        	
-							        	String comment=String.valueOf(acqId)+String.valueOf(transType)+ApprCode+stan;
-							        	
-							        	int length_comment=comment.length();
-							        	int remSpacecomment=250-length_comment;
-							        	 char[] arrSpacecomment = new char[remSpacecomment];
-								        	if(length_comment<250)
+							        	int length_AQCID =AQCID.length();
+						        		int rem0AQCID=4-length_AQCID;
+							        	 char[] arr0AQCID = new char[rem0AQCID];
+								        	if(length_AQCID<4)
 								        	{
-								        		for(int x=0;x<remSpacecomment;x++)
+								        		for(int x=0;x<rem0AQCID;x++)
 								        		{
-								        			arrSpacecomment[x]=' ';
+								        			arr0AQCID[x]=' ';
+								        		}	
+								        		
+								        	}
+								        	String spaces_AQCID = new String(arr0AQCID);
+								        	
+								        	
+								       String TRANTYPE=String.valueOf(transType);
+								       int length_TRANTYPE =TRANTYPE.length();
+						        		int rem0TRANTYPE=4-length_TRANTYPE;
+							        	 char[] arr0TRANTYPE = new char[rem0TRANTYPE];
+								        	if(length_TRANTYPE<4)
+								        	{
+								        		for(int x=0;x<rem0TRANTYPE;x++)
+								        		{
+								        			arr0TRANTYPE[x]=' ';
+								        		}	
+								        		
+								        	}
+								        	String spaces_TRANTYPE = new String(arr0TRANTYPE);
+							        	
+							        	
+							        	
+							        //	System.out.println("AQCID "+AQCID+spaces_AQCID);
+							        	
+							        	
+							        	
+							        	
+						        	
+				        		
+							        	int space_TType_UTType_FCode_DepId=6;
+								        char[] spaceTType_UTType_FCode_DepId = new char[space_TType_UTType_FCode_DepId];
+								        for(int x=0;x<space_TType_UTType_FCode_DepId;x++)
+								    		{
+									        	spaceTType_UTType_FCode_DepId[x]=' ';
+								    		}
+								        String TType_UTType_FCode_DepIdSpace = new String(spaceTType_UTType_FCode_DepId);
+								        
+								        
+								        			        	
+						        		//BigDecimal transactionId= new BigDecimal(D_TransactionId);	
+						        		
+						        		int length_transactionId=String.valueOf(transactionId).length();
+								        int rem0transactionId=41-length_transactionId;
+							        	 char[] arr0transactionId = new char[rem0transactionId];
+								        	if(length_transactionId<41)
+								        	{
+								        		for(int x=0;x<rem0transactionId;x++)
+								        		{
+								        			arr0transactionId[x]=' ';
 								        		}	
 								        		
 								        	}
 								        	
-								        	String space_comment = new String(arrSpacecomment);
+								        	String space_transactionId = new String(arr0transactionId);
 								        	
-							        	int space_AfterComment=132;
-							 	        char[] spaceAfterComment = new char[space_AfterComment];
-							 	        for(int a=0;a<space_AfterComment;a++)
-							     		{
-							 	        	spaceAfterComment[a]=' ';
-							     		}
-							 	        String CommentSpace = new String(spaceAfterComment);
-							        	
-					        		
-					        		
-					        		
-					        		
-					        		
-					        	
-					        	writer_vooma.println("CO2TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001VOOMA"+VOOMAKESSpace+"KES"+fullDate+date_y
-					        			+"00100"+zeros_LineNumber+lineNumber_VOOMA+"2"+zeros_Amount+amount+D_or_C+" "+tranDate+SettlDate+Our_ref1+space_Our_ref1
-					        			+TranDateTime+"  "+Our_ref2+space_Our_ref2+RRN+spaces_RRN+TType_UTType_FCode_DepIdSpace+transactionId+space_transactionId
-					        			+SenderReceiverInstCode+space_senderReceiver+comment+space_comment+CommentSpace);              	
-			                	              	
-			                
-			                	
-			                	vooma_totalTransAmount=vooma_totalTransAmount+cell_TranAmount;
-			                	lineNumber_VOOMA=lineNumber_VOOMA+1;
-			        			
-			        		}
-			        		//END VOOMA STATEMENT LINE
-			        		
-			        		//START T24 STATEMENT LINE
-			        		else ///T24
-			        		{
-			        			String D_or_C="";
-			                	if((transType==26 && mti==1200) || (transType==10 && mti==1420))
-			                	{
-			                		D_or_C="C";
-			                	}
-			                
-			                	if((transType==26 && mti==1420) || (transType==10 && mti==1200))
-			                	{
-			                		D_or_C="D";
-			                	}
-			                	
-			                	
-			                	int length_lineNumber = String.valueOf(lineNumber_T24).length();
-					        	int rem0lineNumber=4-length_lineNumber;
-					        	char[] arr0 = new char[rem0lineNumber];
-					        	if(length_lineNumber<12)
-					        	{
-					        		for(int x=0;x<rem0lineNumber;x++)
-					        		{
-					        			arr0[x]='0';
-					        		}	
-					        		
-					        	}
-					        	
-					        	String zeros_LineNumber = new String(arr0);
-					        	
-					        	double transamount_absoluteVal=Math.abs(cell_TranAmount);
-					        	//int amount = (int) (transamount_absoluteVal*10000);
-					        	BigDecimal amount= new BigDecimal(transamount_absoluteVal*10000);
-					        	
-					        	int length_Amount = String.valueOf(amount).length();
-					        	
-					        	 int rem0Amount=18-length_Amount;
-					        	 char[] arr0Amount = new char[rem0Amount];
-						        	if(length_Amount<18)
-						        	{
-						        		for(int x=0;x<rem0Amount;x++)
-						        		{
-						        			arr0Amount[x]='0';
-						        		}	
-						        		
-						        	}
-					        	String zeros_Amount = new String(arr0Amount);	
-					        	
-					        	
-					        	double cell_TranDateTime=row.getCell(58).getNumericCellValue();		        		
-				        		BigDecimal TranDateTime= new BigDecimal(cell_TranDateTime);		        		
-				        		String str_TranDateTime = String.valueOf(TranDateTime);
-				        		String tranDate=str_TranDateTime.substring(0, 8);
-				        		
-				        		double cell_SettlDate =row.getCell(51).getNumericCellValue();		        		
-				        		BigDecimal SettlDate = new BigDecimal(cell_SettlDate);		
-				        		
-				        		String Our_ref1="";
-				        		String SenderAn =formatter.formatCellValue(row.getCell(43,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-				        		
-				        		BigDecimal bd_SenderAn;
-				        		if(SenderAn.contains("+"))
-				        		{
-				        			double d_senderAn=row.getCell(43).getNumericCellValue();
-				        			bd_SenderAn=new BigDecimal(d_senderAn);
-				        			SenderAn=String.valueOf(bd_SenderAn);
-				        		}
-				        		
-				        		
-				        		String ReceiverAn =formatter.formatCellValue(row.getCell(102,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));		        		
-				        		BigDecimal bd_ReceiverAn;
-				        		if(ReceiverAn.contains("+"))
-				        		{
-				        			double d_ReceiverAn=row.getCell(102).getNumericCellValue();
-				        			bd_ReceiverAn=new BigDecimal(d_ReceiverAn);
-				        			ReceiverAn=String.valueOf(bd_ReceiverAn);
-				        		}
-				        		
-				        		if(D_or_C.contains("D"))
-				        		{
-				        			Our_ref1=SenderAn;
-				        		}
-				        		
-				        		if(D_or_C.contains("C"))
-				        		{
-				        			Our_ref1=ReceiverAn;
-				        		}
-				        		
-				        		int length_Our_ref1=Our_ref1.length();
-					        	int rem0Our_ref1=16-length_Our_ref1;
-					        	 char[] arr0Our_ref1 = new char[rem0Our_ref1];
-						        	if(length_Our_ref1<16)
-						        	{
-						        		for(int x=0;x<rem0Our_ref1;x++)
-						        		{
-						        			arr0Our_ref1[x]=' ';
-						        			//arr0senderAcc[x]='0';
-						        		}	
-						        		
-						        	}
-						        	
-					        	String space_Our_ref1 = new String(arr0Our_ref1);
-					        	
-					        	String Our_ref2=Our_ref1;
-					        	String space_Our_ref2=space_Our_ref1;
-					        	
-					        	
-					        	double D_RRN=row.getCell(41).getNumericCellValue();			        	
-				        		BigDecimal RRN= new BigDecimal(D_RRN);
-				        		
-				        		int length_RRN = String.valueOf(RRN).length();
-				        		int rem0RRN=16-length_RRN;
-					        	 char[] arr0RRN = new char[rem0RRN];
-						        	if(length_RRN<16)
-						        	{
-						        		for(int x=0;x<rem0RRN;x++)
-						        		{
-						        			arr0RRN[x]=' ';
-						        		}	
-						        		
-						        	}
-						        	
-						        	String spaces_RRN = new String(arr0RRN);
-					        	
-			        		
-						        	int space_TType_UTType_FCode_DepId=14;
-							        char[] spaceTType_UTType_FCode_DepId = new char[space_TType_UTType_FCode_DepId];
-							        for(int x=0;x<space_TType_UTType_FCode_DepId;x++)
-							    		{
-								        	spaceTType_UTType_FCode_DepId[x]=' ';
-							    		}
-							        String TType_UTType_FCode_DepIdSpace = new String(spaceTType_UTType_FCode_DepId);
-							        
-							        double D_TransactionId=row.getCell(62).getNumericCellValue();			        	
-					        		BigDecimal transactionId= new BigDecimal(D_TransactionId);	
-					        		
-					        		int length_transactionId=String.valueOf(transactionId).length();
-							        int rem0transactionId=41-length_transactionId;
-						        	 char[] arr0transactionId = new char[rem0transactionId];
-							        	if(length_transactionId<41)
-							        	{
-							        		for(int x=0;x<rem0transactionId;x++)
-							        		{
-							        			arr0transactionId[x]=' ';
-							        		}	
-							        		
-							        	}
-							        	
-							        	String space_transactionId = new String(arr0transactionId);
-							        	
-						        	String receiverInstCode=formatter.formatCellValue(row.getCell(104,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-						        	String senderInstCode=formatter.formatCellValue(row.getCell(107,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-						        	String SenderReceiverInstCode="R"+String.valueOf(receiverInstCode)+"  "+"S"+String.valueOf(senderInstCode);
-						        	int length_senderReceiver=SenderReceiverInstCode.length();
-						        	int remSpacesenderReceiver=400-length_senderReceiver;
-						        	 char[] arrSpacesenderReceiver = new char[remSpacesenderReceiver];
-							        	if(length_senderReceiver<400)
-							        	{
-							        		for(int x=0;x<remSpacesenderReceiver;x++)
-							        		{
-							        			arrSpacesenderReceiver[x]=' ';
-							        		}	
-							        		
-							        	}
-							        	
-							        	String space_senderReceiver = new String(arrSpacesenderReceiver);
-							        	
-							        	String ApprCode=formatter.formatCellValue(row.getCell(3,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-							        	String stan=formatter.formatCellValue(row.getCell(52,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-							        	
-							        	
-							        	String comment=String.valueOf(acqId)+String.valueOf(transType)+ApprCode+stan;
-							        	
-							        	int length_comment=comment.length();
-							        	int remSpacecomment=250-length_comment;
-							        	 char[] arrSpacecomment = new char[remSpacecomment];
-								        	if(length_comment<250)
+							        	String receiverInstCode=formatter.formatCellValue(row.getCell(104,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+							        	String senderInstCode=formatter.formatCellValue(row.getCell(107,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+							        	String SenderReceiverInstCode="R"+String.valueOf(receiverInstCode)+"  "+"S"+String.valueOf(senderInstCode);
+							        	int length_senderReceiver=SenderReceiverInstCode.length();
+							        	int remSpacesenderReceiver=400-length_senderReceiver;
+							        	 char[] arrSpacesenderReceiver = new char[remSpacesenderReceiver];
+								        	if(length_senderReceiver<400)
 								        	{
-								        		for(int x=0;x<remSpacecomment;x++)
+								        		for(int x=0;x<remSpacesenderReceiver;x++)
 								        		{
-								        			arrSpacecomment[x]=' ';
+								        			arrSpacesenderReceiver[x]=' ';
 								        		}	
 								        		
 								        	}
 								        	
-								        	String space_comment = new String(arrSpacecomment);
+								        	String space_senderReceiver = new String(arrSpacesenderReceiver);
 								        	
-							        	int space_AfterComment=132;
-							 	        char[] spaceAfterComment = new char[space_AfterComment];
-							 	        for(int a=0;a<space_AfterComment;a++)
-							     		{
-							 	        	spaceAfterComment[a]=' ';
-							     		}
-							 	        String CommentSpace = new String(spaceAfterComment);
+								        	String ApprCode=formatter.formatCellValue(row.getCell(3,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+								        	String stan=formatter.formatCellValue(row.getCell(52,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+								        	
+								        	
+								        	String comment=String.valueOf(acqId)+String.valueOf(transType)+ApprCode+stan;
+								        	
+								        	int length_comment=comment.length();
+								        	int remSpacecomment=250-length_comment;
+								        	 char[] arrSpacecomment = new char[remSpacecomment];
+									        	if(length_comment<250)
+									        	{
+									        		for(int x=0;x<remSpacecomment;x++)
+									        		{
+									        			arrSpacecomment[x]=' ';
+									        		}	
+									        		
+									        	}
+									        	
+									        	String space_comment = new String(arrSpacecomment);
+									        	
+								        	int space_AfterComment=132;
+								 	        char[] spaceAfterComment = new char[space_AfterComment];
+								 	        for(int a=0;a<space_AfterComment;a++)
+								     		{
+								 	        	spaceAfterComment[a]=' ';
+								     		}
+								 	        String CommentSpace = new String(spaceAfterComment);
+								        	
+						        		
+						        		
+						        		
+						        		
+						        		
+						        	
+						        	writer_vooma.println("CO2TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001VOOMA"+VOOMAKESSpace+"KES"+fullDate+date_y
+						        			+"00001"+zeros_LineNumber+lineNumber_VOOMA+"2"+zeros_Amount+amount+D_or_C+" "+tranDate+SettlDate+Our_ref1+space_Our_ref1
+						        			+THR1+spaces_THR1+Our_ref2+space_Our_ref2+THR2+spaces_THR2+AQCID+spaces_AQCID+TRANTYPE+spaces_TRANTYPE
+						        			+TType_UTType_FCode_DepIdSpace+transactionId+space_transactionId
+						        			+SenderReceiverInstCode+space_senderReceiver+comment+space_comment+CommentSpace);              	
+				                	              	
+				                
+				                	
+				                	vooma_totalTransAmount=vooma_totalTransAmount+cell_TranAmount;
+				                	lineNumber_VOOMA=lineNumber_VOOMA+1;
+				        			
+				        		}
+				        		//END VOOMA STATEMENT LINE
+				        		
+				        		//START T24 STATEMENT LINE
+				        		else ///T24
+				        		{
+				        			String D_or_C="";
+				                	if((transType==26 && mti==1200) || (transType==10 && mti==1420))
+				                	{
+				                		D_or_C="C";
+				                		cell_TranAmount=-(cell_TranAmount);
+				                	}
+				                
+				                	if((transType==26 && mti==1420) || (transType==10 && mti==1200))
+				                	{
+				                		D_or_C="D";
+				                	}
+				                	
+				                	
+				                	int length_lineNumber = String.valueOf(lineNumber_T24).length();
+						        	int rem0lineNumber=4-length_lineNumber;
+						        	char[] arr0 = new char[rem0lineNumber];
+						        	if(length_lineNumber<12)
+						        	{
+						        		for(int x=0;x<rem0lineNumber;x++)
+						        		{
+						        			arr0[x]='0';
+						        		}	
+						        		
+						        	}
+						        	
+						        	
+						        	String zeros_LineNumber = new String(arr0);
+						        	//cell_TranAmount=cell_TranAmount/100;
+						        	
+						        	double transamount_absoluteVal=Math.abs(cell_TranAmount);
+						        	//int amount = (int) (transamount_absoluteVal*10000);
+						        	BigDecimal amount= new BigDecimal(transamount_absoluteVal*100);
+						        	
+						        	int length_Amount = String.valueOf(amount).length();
+						        	
+						        	 int rem0Amount=18-length_Amount;
+						        	 char[] arr0Amount = new char[rem0Amount];
+							        	if(length_Amount<18)
+							        	{
+							        		for(int x=0;x<rem0Amount;x++)
+							        		{
+							        			arr0Amount[x]='0';
+							        		}	
+							        		
+							        	}
+						        	String zeros_Amount = new String(arr0Amount);	
+						        	
+						        	
+						        	double cell_TranDateTime=row.getCell(58).getNumericCellValue();		        		
+					        		BigDecimal TranDateTime= new BigDecimal(cell_TranDateTime);		        		
+					        		String str_TranDateTime = String.valueOf(TranDateTime);
+					        		String tranDate=str_TranDateTime.substring(0, 8);
+					        		
+					        		double cell_SettlDate =row.getCell(51).getNumericCellValue();		        		
+					        		BigDecimal SettlDate = new BigDecimal(cell_SettlDate);		
+					        		
+					        		String Our_ref1="";
+					        		String SenderAn =formatter.formatCellValue(row.getCell(43,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+					        		
+					        		BigDecimal bd_SenderAn;
+					        		if(SenderAn.contains("+"))
+					        		{
+					        			double d_senderAn=row.getCell(43).getNumericCellValue();
+					        			bd_SenderAn=new BigDecimal(d_senderAn);
+					        			SenderAn=String.valueOf(bd_SenderAn);
+					        		}
+					        		
+					        		
+					        		String ReceiverAn =formatter.formatCellValue(row.getCell(102,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));		        		
+					        		BigDecimal bd_ReceiverAn;
+					        		if(ReceiverAn.contains("+"))
+					        		{
+					        			double d_ReceiverAn=row.getCell(102).getNumericCellValue();
+					        			bd_ReceiverAn=new BigDecimal(d_ReceiverAn);
+					        			ReceiverAn=String.valueOf(bd_ReceiverAn);
+					        		}
+					        		
+					        		if(D_or_C.contains("D"))
+					        		{
+					        			Our_ref1=SenderAn;
+					        		}
+					        		
+					        		if(D_or_C.contains("C"))
+					        		{
+					        			Our_ref1=ReceiverAn;
+					        		}
+					        		
+					        		int length_Our_ref1=Our_ref1.length();
+						        	int rem0Our_ref1=16-length_Our_ref1;
+						        	 char[] arr0Our_ref1 = new char[rem0Our_ref1];
+							        	if(length_Our_ref1<16)
+							        	{
+							        		for(int x=0;x<rem0Our_ref1;x++)
+							        		{
+							        			arr0Our_ref1[x]=' ';
+							        			//arr0senderAcc[x]='0';
+							        		}	
+							        		
+							        	}
 							        	
+						        	String space_Our_ref1 = new String(arr0Our_ref1);
+						        	
+						        	String Our_ref2=Our_ref1;
+						        	String space_Our_ref2=space_Our_ref1;
+						        	
+						        	
+						        	double D_RRN=row.getCell(41).getNumericCellValue();			        	
+					        		BigDecimal RRN= new BigDecimal(D_RRN);
 					        		
-					        		
-					        		
-					        		
-					        		
-					        	
-					        	writer_T24.println("CO2TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001TWO"+TWOKESSpace+"KES"+fullDate+date_y
-					        			+"00100"+zeros_LineNumber+lineNumber_T24+"2"+zeros_Amount+amount+D_or_C+" "+tranDate+SettlDate+Our_ref1+space_Our_ref1
-					        			+TranDateTime+"  "+Our_ref2+space_Our_ref2+RRN+spaces_RRN+TType_UTType_FCode_DepIdSpace+transactionId+space_transactionId
-					        			+SenderReceiverInstCode+space_senderReceiver+comment+space_comment+CommentSpace);              	
-			                	              	
-			                
-			                	T24_totalTransAmount=T24_totalTransAmount+cell_TranAmount;
-			                	lineNumber_T24=lineNumber_T24+1;
-			        		
-							}
-			        		
-			        		//END T24 STATEMENT LINE
-			        		
+					        		int length_RRN = String.valueOf(RRN).length();
+					        		int rem0RRN=16-length_RRN;
+						        	 char[] arr0RRN = new char[rem0RRN];
+							        	if(length_RRN<16)
+							        	{
+							        		for(int x=0;x<rem0RRN;x++)
+							        		{
+							        			arr0RRN[x]=' ';
+							        		}	
+							        		
+							        	}
+							        	
+							        	String spaces_RRN = new String(arr0RRN);
+							        	
+							        	String AQCID=String.valueOf(acqId);
+							        	if(AQCID.length()>4)
+							        	{
+							        		AQCID=AQCID.substring(AQCID.length() - 4);
+							        	}
+							        	else
+							        	{
+							        		AQCID=AQCID;
+										}
+							        	int length_AQCID =AQCID.length();
+						        		int rem0AQCID=4-length_AQCID;
+							        	 char[] arr0AQCID = new char[rem0AQCID];
+								        	if(length_RRN<16)
+								        	{
+								        		for(int x=0;x<rem0AQCID;x++)
+								        		{
+								        			arr0AQCID[x]=' ';
+								        		}	
+								        		
+								        	}
+								        	String spaces_AQCID = new String(arr0AQCID);
+								        	
+								        	 String TRANTYPE=String.valueOf(transType);
+										       int length_TRANTYPE =TRANTYPE.length();
+								        		int rem0TRANTYPE=4-length_TRANTYPE;
+									        	 char[] arr0TRANTYPE = new char[rem0TRANTYPE];
+										        	if(length_TRANTYPE<4)
+										        	{
+										        		for(int x=0;x<rem0TRANTYPE;x++)
+										        		{
+										        			arr0TRANTYPE[x]=' ';
+										        		}	
+										        		
+										        	}
+										        	String spaces_TRANTYPE = new String(arr0TRANTYPE);
+									        	
+							        	
+							        	//System.out.println("AQCID "+AQCID+spaces_AQCID);
+						        	
+				        		
+							        	int space_TType_UTType_FCode_DepId=6;
+								        char[] spaceTType_UTType_FCode_DepId = new char[space_TType_UTType_FCode_DepId];
+								        for(int x=0;x<space_TType_UTType_FCode_DepId;x++)
+								    		{
+									        	spaceTType_UTType_FCode_DepId[x]=' ';
+								    		}
+								        String TType_UTType_FCode_DepIdSpace = new String(spaceTType_UTType_FCode_DepId);
+								        
+								        double D_TransactionId=row.getCell(62).getNumericCellValue();			        	
+						        		BigDecimal transactionId= new BigDecimal(D_TransactionId);	
+						        		
+						        		int length_transactionId=String.valueOf(transactionId).length();
+								        int rem0transactionId=41-length_transactionId;
+							        	 char[] arr0transactionId = new char[rem0transactionId];
+								        	if(length_transactionId<41)
+								        	{
+								        		for(int x=0;x<rem0transactionId;x++)
+								        		{
+								        			arr0transactionId[x]=' ';
+								        		}	
+								        		
+								        	}
+								        	
+								        	String space_transactionId = new String(arr0transactionId);
+								        	
+							        	String receiverInstCode=formatter.formatCellValue(row.getCell(104,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+							        	String senderInstCode=formatter.formatCellValue(row.getCell(107,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+							        	String SenderReceiverInstCode="R"+String.valueOf(receiverInstCode)+"  "+"S"+String.valueOf(senderInstCode);
+							        	int length_senderReceiver=SenderReceiverInstCode.length();
+							        	int remSpacesenderReceiver=400-length_senderReceiver;
+							        	 char[] arrSpacesenderReceiver = new char[remSpacesenderReceiver];
+								        	if(length_senderReceiver<400)
+								        	{
+								        		for(int x=0;x<remSpacesenderReceiver;x++)
+								        		{
+								        			arrSpacesenderReceiver[x]=' ';
+								        		}	
+								        		
+								        	}
+								        	
+								        	String space_senderReceiver = new String(arrSpacesenderReceiver);
+								        	
+								        	String ApprCode=formatter.formatCellValue(row.getCell(3,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+								        	String stan=formatter.formatCellValue(row.getCell(52,Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+								        	
+								        	
+								        	String comment=String.valueOf(acqId)+String.valueOf(transType)+ApprCode+stan;
+								        	
+								        	int length_comment=comment.length();
+								        	int remSpacecomment=250-length_comment;
+								        	 char[] arrSpacecomment = new char[remSpacecomment];
+									        	if(length_comment<250)
+									        	{
+									        		for(int x=0;x<remSpacecomment;x++)
+									        		{
+									        			arrSpacecomment[x]=' ';
+									        		}	
+									        		
+									        	}
+									        	
+									        	String space_comment = new String(arrSpacecomment);
+									        	
+								        	int space_AfterComment=132;
+								 	        char[] spaceAfterComment = new char[space_AfterComment];
+								 	        for(int a=0;a<space_AfterComment;a++)
+								     		{
+								 	        	spaceAfterComment[a]=' ';
+								     		}
+								 	        String CommentSpace = new String(spaceAfterComment);
+								 
+						        	
+						        	writer_T24.println("CO2TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001TWO"+TWOKESSpace+"KES"+fullDate+date_y
+						        			+"00001"+zeros_LineNumber+lineNumber_T24+"2"+zeros_Amount+amount+D_or_C+" "+tranDate+SettlDate+Our_ref1+space_Our_ref1
+						        			+TranDateTime+"  "+Our_ref2+space_Our_ref2+RRN+spaces_RRN+AQCID+spaces_AQCID+TRANTYPE+spaces_TRANTYPE+TType_UTType_FCode_DepIdSpace+transactionId+space_transactionId
+						        			+SenderReceiverInstCode+space_senderReceiver+comment+space_comment+CommentSpace);              	
+				                	              	
+				                
+				                	T24_totalTransAmount=T24_totalTransAmount+cell_TranAmount;
+				                	lineNumber_T24=lineNumber_T24+1;
+				        		
+								}
+				        		
+				        		//END T24 STATEMENT LINE
+				        		
+				        		
+				        	}
+				        	//transtype!=50 end
 			        		
 			        	}
-			        	//transtype!=50 end
+			        	//DTorFT end if
+			        	
 			        	
 			        	
 			        	
@@ -611,7 +742,7 @@ public class PesalinkCSNFController
 			        
 			        
 			        BigDecimal absolute_vooma_totalTransAmount=b_vooma_totalTransAmount.abs();        
-			        BigDecimal post_vooma_totalTransAmount= absolute_vooma_totalTransAmount.multiply(new BigDecimal(10000));
+			        BigDecimal post_vooma_totalTransAmount= absolute_vooma_totalTransAmount.multiply(new BigDecimal(100));
 			        
 			        
 			        
@@ -671,7 +802,7 @@ public class PesalinkCSNFController
 			    	
 			        
 			        writer_vooma.println("CO2TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001VOOMA"+VOOMAKESSpace+"KES"+fullDate+date_y
-			    			+"00100"+zeros_LineNumberVOOMA+lineNumber_VOOMA+"2"+zeros_voomaAmount+post_vooma_totalTransAmount+vooma_Total_DorC+" "
+			    			+"00001"+zeros_LineNumberVOOMA+lineNumber_VOOMA+"2"+zeros_voomaAmount+post_vooma_totalTransAmount+vooma_Total_DorC+" "
 			        		+fullDate+fullDate+vooma_dummyString+vooma_spaceDummy);
 			        
 			        /*----------------------------- */
@@ -680,7 +811,7 @@ public class PesalinkCSNFController
 			         
 			         
 			         BigDecimal absolute_T24_totalTransAmount=b_T24_totalTransAmount.abs();        
-			         BigDecimal post_T24_totalTransAmount= absolute_T24_totalTransAmount.multiply(new BigDecimal(10000));
+			         BigDecimal post_T24_totalTransAmount= absolute_T24_totalTransAmount.multiply(new BigDecimal(100));
 			         
 			         
 			         
@@ -741,7 +872,7 @@ public class PesalinkCSNFController
 			     	
 			         
 			         writer_T24.println("CO2TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001TWO"+TWOKESSpace+"KES"+fullDate+date_y
-			     			+"00100"+zeros_LineNumberT24+lineNumber_T24+"2"+zeros_T24Amount+post_T24_totalTransAmount+T24_Total_DorC+" "
+			     			+"00001"+zeros_LineNumberT24+lineNumber_T24+"2"+zeros_T24Amount+post_T24_totalTransAmount+T24_Total_DorC+" "
 			         		+fullDate+fullDate+T24_dummyString+T24_spaceDummy);
 			        
 			      //OUTPUT SUM OF ENTRIES-->
@@ -765,7 +896,7 @@ public class PesalinkCSNFController
 			   
 			        
 			        writer_vooma.println("CO3TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001VOOMA"+VOOMAKESSpace+"KES"
-			       +fullDate+date_y+"00100"+zeros_closingLineNumberVOOMA+closingLineNumberVOOMA+"3"
+			       +fullDate+date_y+"00001"+zeros_closingLineNumberVOOMA+closingLineNumberVOOMA+"3"
 			       +fullDate+"000000000000000000C"+AfterOpenBalSpace);
 			        /*---------------------------*/
 			        
@@ -787,7 +918,7 @@ public class PesalinkCSNFController
 			   
 			        
 			        writer_T24.println("CO3TKCBLKENX"+NXKCBSpace+"KCBLKENX"+NXKCBSpace+"KES1400530450001TWO"+TWOKESSpace+"KES"
-			       +fullDate+date_y+"00100"+zeros_closingLineNumberT24+closingLineNumberT24+"3"
+			       +fullDate+date_y+"00001"+zeros_closingLineNumberT24+closingLineNumberT24+"3"
 			       +fullDate+"000000000000000000C"+AfterOpenBalSpace);
 			        
 			        
@@ -805,20 +936,31 @@ public class PesalinkCSNFController
 					
 					//Close the reader
 					ExcelFile_Reader.close();
+					
 					//move the read excel file to backup
-					file.renameTo(new File(backUpFolder+"\\"+currentFile));
+					String bk1_currentFile=currentFile.substring(0, 0) + dateNow+" "+currentFile.substring(0);
+					file.renameTo(new File(backUpFolder+"\\"+bk1_currentFile));
+					//file.delete();
+					
 					
 				} catch (Exception e) 
 				{
 					// TODO: handle exception
 					System.out.println(e.getMessage());
+					e.printStackTrace();
+					
+				
 					ExcelFile_Reader.close();
 					
-					file.renameTo(new File(errorFolder+"\\"+currentFile));
+					String error_currentFile=currentFile.substring(0, 0) + dateNow +" "+currentFile.substring(0);
+					file.renameTo(new File(errorFolder+"\\"+error_currentFile));
+					
 				}
 				
-				
+				ExcelFile_Reader.close();
+			
 			}
+			
 		}
 		//for end
 		
