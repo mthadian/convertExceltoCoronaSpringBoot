@@ -10,11 +10,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 
 /**
  * @author PMMuthama
@@ -25,11 +27,22 @@ public class PesalinkCSNFController
 {
 	public static void executeCSNF() throws IOException
 	{
+		String slash="";
+		
+		if (SystemUtils.IS_OS_WINDOWS)
+		{
+			slash="\\";
+		}
+		else 
+		{
+			slash="/";
+		}
+		
 		String currentWorkingDir = System.getProperty("user.dir");
-		String inputFolder=currentWorkingDir.concat("\\input");		
-		String outputFolder=currentWorkingDir.concat("\\output");
-		String errorFolder=currentWorkingDir.concat("\\error");
-		String backUpFolder=currentWorkingDir.concat("\\backup");
+		String inputFolder=currentWorkingDir.concat(slash+"input");		
+		String outputFolder=currentWorkingDir.concat(slash+"output");
+		String errorFolder=currentWorkingDir.concat(slash+"error");
+		String backUpFolder=currentWorkingDir.concat(slash+"backup");
 		
 		//InputStream ExcelFile_Reader = new FileInputStream(inputFolder.concat("\\CSNF20190225_BANK01_1.xlsx"));
 		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
@@ -43,19 +56,37 @@ public class PesalinkCSNFController
 		for(File file:files)
 		{
 			String currentFile=file.getName();
-			InputStream ExcelFile_Reader = new FileInputStream(inputFolder.concat("\\"+currentFile));
+			
 			if(currentFile.contains("CSNF") && currentFile.contains(".xlsx"))
 			{
+                            FileInputStream ExcelFile_Reader = new FileInputStream(inputFolder.concat(slash+currentFile));
+                            XSSFWorkbook wb = new XSSFWorkbook();
 				try 
 				{
 					System.out.println("<--------------CSNF------------->");
 					System.out.println("CURRENT FILE PROCESSING IS "+currentFile);
 					System.out.println("<--------------CSNF------------->");
+                                        
+                                        try 
+                                        {
+                                            wb = new XSSFWorkbook(ExcelFile_Reader);
+
+                                        } catch (Exception e) 
+                                        {
+                                            System.out.println(e.getMessage());
+					e.printStackTrace();
+					if((e.getMessage()).contains("zero bytes"))
+                                            {
+                                                    PesalinkCSNFController.executeCSNF();
+
+                                            }
 					
-					XSSFWorkbook wb = new XSSFWorkbook(ExcelFile_Reader);
+                                        }
+					
+					
 					String file_name=wb.getSheetName(0);
-					PrintWriter writer_vooma = new PrintWriter(outputFolder.concat("\\"+file_name+" "+dateNow+" VOOMA"+".CUT"), "UTF-8");
-					PrintWriter writer_T24 = new PrintWriter(outputFolder.concat("\\"+file_name+" "+dateNow+" T24"+".CUT"), "UTF-8");
+					PrintWriter writer_vooma = new PrintWriter(outputFolder.concat(slash+file_name+" "+dateNow+" VOOMA"+".CUT"), "UTF-8");
+					PrintWriter writer_T24 = new PrintWriter(outputFolder.concat(slash+file_name+" "+dateNow+" T24"+".CUT"), "UTF-8");
 				
 					String fullDate=currentFile.substring(4, 12);
 					String date_yy=currentFile.substring(6, 8);
@@ -935,11 +966,12 @@ public class PesalinkCSNFController
 					
 					
 					//Close the reader
-					ExcelFile_Reader.close();
+					//ExcelFile_Reader.close();
+			       // wb.close();
 					
 					//move the read excel file to backup
 					String bk1_currentFile=currentFile.substring(0, 0) + dateNow+" "+currentFile.substring(0);
-					file.renameTo(new File(backUpFolder+"\\"+bk1_currentFile));
+					//file.renameTo(new File(backUpFolder+slash+bk1_currentFile));
 					//file.delete();
 					
 					
@@ -948,16 +980,30 @@ public class PesalinkCSNFController
 					// TODO: handle exception
 					System.out.println(e.getMessage());
 					e.printStackTrace();
+					if((e.getMessage()).contains("zero bytes"))
+					{
+						PesalinkCSNFController.executeCSNF();
+						
+					}
 					
 				
-					ExcelFile_Reader.close();
+					//ExcelFile_Reader.close();
 					
 					String error_currentFile=currentFile.substring(0, 0) + dateNow +" "+currentFile.substring(0);
-					file.renameTo(new File(errorFolder+"\\"+error_currentFile));
+					file.renameTo(new File(errorFolder+slash+error_currentFile));
+					
+				}
+				finally 
+				{
+					file.delete();
+					wb.close();
+					
+					ExcelFile_Reader.close();
+					
 					
 				}
 				
-				ExcelFile_Reader.close();
+			
 			
 			}
 			

@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.compress.compressors.FileNameUtil;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -30,11 +31,23 @@ public class PesalinkKBAController
 	
 	public static void executeKBA() throws IOException 
 	{
+		String slash="";
+		
+		if (SystemUtils.IS_OS_WINDOWS)
+		{
+			slash="\\";
+		}
+		else 
+		{
+			slash="/";
+		}
+		
 		String currentWorkingDir = System.getProperty("user.dir");
-		String inputFolder=currentWorkingDir.concat("\\input");		
-		String outputFolder=currentWorkingDir.concat("\\output");
-		String errorFolder=currentWorkingDir.concat("\\error");
-		String backUpFolder=currentWorkingDir.concat("\\backup");
+		String inputFolder=currentWorkingDir.concat(slash+"input");		
+		String outputFolder=currentWorkingDir.concat(slash+"output");
+		String errorFolder=currentWorkingDir.concat(slash+"error");
+		String backUpFolder=currentWorkingDir.concat(slash+"backup");
+		
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 		Date gdate = new Date();
@@ -48,7 +61,8 @@ public class PesalinkKBAController
 		for(File file:files)
 		{
 			String currentFile=file.getName();
-			InputStream ExcelFile_Reader = new FileInputStream(inputFolder.concat("\\"+currentFile));
+			InputStream ExcelFile_Reader = new FileInputStream(inputFolder.concat(slash+currentFile));
+			XSSFWorkbook wb = new XSSFWorkbook();
 			if(currentFile.contains("KBA") && currentFile.contains(".xlsx"))
 			{
 				try
@@ -57,10 +71,25 @@ public class PesalinkKBAController
 					System.out.println("CURRENT FILE PROCESSING IS "+currentFile);
 					System.out.println("<--------------KBA------------->");
 				
-					XSSFWorkbook wb = new XSSFWorkbook(ExcelFile_Reader);
+					//XSSFWorkbook wb = new XSSFWorkbook(ExcelFile_Reader);
+                                        try 
+                                        {
+                                            wb = new XSSFWorkbook(ExcelFile_Reader);
+
+                                        } catch (Exception e) 
+                                        {
+                                            System.out.println(e.getMessage());
+					e.printStackTrace();
+					if((e.getMessage()).contains("zero bytes"))
+                                            {
+                                                    PesalinkKBAController.executeKBA();
+
+                                            }
+					
+                                        }
 					String file_name=wb.getSheetName(0);
-					PrintWriter writer_vooma = new PrintWriter(outputFolder.concat("\\"+file_name+" "+dateNow+" VOOMA"+".CUT"), "UTF-8");
-					PrintWriter writer_T24 = new PrintWriter(outputFolder.concat("\\"+file_name+" "+dateNow+" T24"+".CUT"), "UTF-8");
+					PrintWriter writer_vooma = new PrintWriter(outputFolder.concat(slash+file_name+" "+dateNow+" VOOMA"+".CUT"), "UTF-8");
+					PrintWriter writer_T24 = new PrintWriter(outputFolder.concat(slash+file_name+" "+dateNow+" T24"+".CUT"), "UTF-8");
 					
 					DataFormatter formatter = new DataFormatter();
 					
@@ -818,7 +847,7 @@ public class PesalinkKBAController
 				        
 				        writer_vooma.close();
 				        writer_T24.close();
-				        
+				        wb.close();
 				        System.out.println("<-------WAITING FOR NEW FILE INPUT -------->");
 				     
 					
@@ -827,7 +856,7 @@ public class PesalinkKBAController
 					ExcelFile_Reader.close();
 					//move the read excel file to backup
 					String bk_currentFile=currentFile.substring(0, 0) + dateNow +" "+ currentFile.substring(0);
-					file.renameTo(new File(backUpFolder+"\\"+bk_currentFile));
+					//file.renameTo(new File(backUpFolder+slash+bk_currentFile));
 					
 					
 				} catch (Exception e) 
@@ -835,13 +864,27 @@ public class PesalinkKBAController
 					
 					System.out.println(e.getMessage());
 					e.printStackTrace();
+					if((e.getMessage()).contains("zero bytes"))
+					{
+						PesalinkKBAController.executeKBA();
+						
+					}
 					ExcelFile_Reader.close();
 					
 					String error_currentFile=currentFile.substring(0, 0) + dateNow +" "+ currentFile.substring(0);
-					file.renameTo(new File(errorFolder+"\\"+error_currentFile));
+					file.renameTo(new File(errorFolder+slash+error_currentFile));
 					
 				}
-				ExcelFile_Reader.close();
+				finally 
+				{
+					file.delete();
+					wb.close();
+					
+					ExcelFile_Reader.close();
+					
+					
+				}
+				
 				
 				
 				

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -30,11 +31,26 @@ public class ConvertCSVtoXLSX
 {
 	public static void CSVtoXLSX()
 	{
+		String slash="";
+		
+		if (SystemUtils.IS_OS_WINDOWS)
+		{
+			slash="\\";
+		}
+		else 
+		{
+			slash="/";
+		}
+		
 		String currentWorkingDir = System.getProperty("user.dir");
-		String inputFolder=currentWorkingDir.concat("\\input");	
+		String inputFolder=currentWorkingDir.concat(slash+"input");		
+		String outputFolder=currentWorkingDir.concat(slash+"output");
+		String errorFolder=currentWorkingDir.concat(slash+"error");
+		String backUpFolder=currentWorkingDir.concat(slash+"backup");
+
 		try {
-	        String csvFileAddress = inputFolder.concat("\\KBA Session transactions report.csv"); //csv file address
-	        String xlsxFileAddress = inputFolder.concat("\\KBA Session transactions report.xlsx");; //xlsx file address
+	        String csvFileAddress = inputFolder.concat(slash+"KBA Session transactions report.csv"); //csv file address
+	        String xlsxFileAddress = inputFolder.concat(slash+"KBA Session transactions report.xlsx");; //xlsx file address
 	        XSSFWorkbook workBook = new XSSFWorkbook();
 	        XSSFSheet sheet = workBook.createSheet("sheet1");
 	        String currentLine=null;

@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.commons.lang3.SystemUtils;
+
 
 /**
  * @author PMMuthama
@@ -15,8 +17,22 @@ public class DeleteFiles
 {
 	public static void deleteCorona()
 	{
+		String slash="";
+		
+		if (SystemUtils.IS_OS_WINDOWS)
+		{
+			slash="\\";
+		}
+		else 
+		{
+			slash="/";
+		}
+		
 		String currentWorkingDir = System.getProperty("user.dir");
-		String outputFolder=currentWorkingDir.concat("\\output");
+		String inputFolder=currentWorkingDir.concat(slash+"input");		
+		String outputFolder=currentWorkingDir.concat(slash+"output");
+		String errorFolder=currentWorkingDir.concat(slash+"error");
+		String backUpFolder=currentWorkingDir.concat(slash+"backup");
 		
 		File folderOutput= new File(outputFolder);
 		File[] files=folderOutput.listFiles();
@@ -33,10 +49,23 @@ public class DeleteFiles
 	
 	public static void deleteOldBackups()
 	{
-		String currentWorkingDir = System.getProperty("user.dir");
-		String backupFolder=currentWorkingDir.concat("\\backup");
+		String slash="";
 		
-		File folderBackup=new File(backupFolder);
+		if (SystemUtils.IS_OS_WINDOWS)
+		{
+			slash="\\";
+		}
+		else 
+		{
+			slash="/";
+		}
+		
+		String currentWorkingDir = System.getProperty("user.dir");
+		String inputFolder=currentWorkingDir.concat(slash+"input");		
+		String outputFolder=currentWorkingDir.concat(slash+"output");
+		String errorFolder=currentWorkingDir.concat(slash+"error");
+		String backUpFolder=currentWorkingDir.concat(slash+"backup");
+		File folderBackup=new File(backUpFolder);
 		File[] files=folderBackup.listFiles();
 		for(File file:files)
 		{
