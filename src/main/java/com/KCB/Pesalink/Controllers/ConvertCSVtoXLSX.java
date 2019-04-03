@@ -49,7 +49,7 @@ public class ConvertCSVtoXLSX
 		String backUpFolder=currentWorkingDir.concat(slash+"backup");
 
 		try {
-	        String csvFileAddress = inputFolder.concat(slash+"KBA Session transactions report.csv"); //csv file address
+	        String csvFileAddress = inputFolder.concat(slash+"KBA SESSION TRANSACTION REPORT.csv"); //csv file address
 	        String xlsxFileAddress = inputFolder.concat(slash+"KBA Session transactions report.xlsx");; //xlsx file address
 	        XSSFWorkbook workBook = new XSSFWorkbook();
 	        XSSFSheet sheet = workBook.createSheet("sheet1");
@@ -58,6 +58,8 @@ public class ConvertCSVtoXLSX
 	        BufferedReader br = new BufferedReader(new FileReader(csvFileAddress));
 	        while ((currentLine = br.readLine()) != null) {
 	            String str[] = currentLine.split(",");
+	        	//String str[] = currentLine.split("\\|");
+	            
 	            RowNum++;
 	            XSSFRow currentRow=sheet.createRow(RowNum);
 	            for(int i=0;i<str.length;i++){

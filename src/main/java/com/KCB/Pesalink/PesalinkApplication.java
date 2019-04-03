@@ -56,7 +56,7 @@ public class PesalinkApplication {
 					PesalinkCSNFController.executeCSNF();
 					DeleteFiles.deleteCorona();
 					DeleteFiles.deleteOldBackups();
-					//ConvertCSVtoXLSX.CSVtoXLSX();
+					ConvertCSVtoXLSX.CSVtoXLSX();
 					
 					
 						
